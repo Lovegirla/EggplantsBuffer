@@ -1,0 +1,7 @@
+table TYL
+{
+  id:int;
+  name:string;
+  value:[int];
+}
+root_type TYL;

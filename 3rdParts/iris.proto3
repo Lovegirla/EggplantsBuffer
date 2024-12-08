@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package test1;
+
+message Flower {
+    float sepalLength = 1;
+    float sepalWidth = 2;
+    float petalLength = 3;
+    float petalWidth = 4;
+    string species = 5;
+}
+
+message Flowers {
+    repeated Flower flowers = 1;
+}

@@ -1,0 +1,15 @@
+namespace test;
+
+table Flower {
+    sepalLength: float;
+    sepalWidth: float;
+    petalLength: float;
+    petalWidth: float;
+    species: string;
+}
+
+table Flowers {
+    flowers: [Flower];
+}
+
+root_type Flowers;

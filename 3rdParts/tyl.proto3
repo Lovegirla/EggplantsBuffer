@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+message TYL {
+  int32 id = 1;          // 表示 id 字段
+  string name = 2;       // 表示 name 字段
+  repeated int32 value = 3; // 表示 value 是一个整数数组
+}
