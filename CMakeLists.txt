@@ -10,5 +10,6 @@ ${PROJECT_SOURCE_DIR}/VegetablesBuffer ${PROJECT_SOURCE_DIR}/VegetablesBuffer/pr
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_executable( EGGPLANTSBUFFER src/iris.proto3.pb.cc src/main.cpp src/tyl.proto3.pb.cc src/SerializeFamily.cpp src/datastruct.cpp)
+add_executable( EGGPLANTSBUFFER src/iris.proto3.pb.cc src/main.cpp src/tyl.proto3.pb.cc 
+        src/SerializeFamily.cpp src/datastruct.cpp src/MyTest.cpp src/articles.proto3.pb.cc)
 target_link_libraries(EGGPLANTSBUFFER PRIVATE ${PROTOBUF_LIBRARIES})

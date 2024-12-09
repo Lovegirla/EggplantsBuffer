@@ -1,0 +1,28 @@
+namespace ArticleData;
+
+table CAnswer {
+    answer_start: int;
+    text: string;
+}
+
+table QASData {
+    id: string;
+    question: string;
+    answers: [CAnswer];
+}
+
+table Paragraph {
+    context: string;
+    qasData: [QASData];
+}
+
+table Article {
+    title: string;
+    paragraphs: [Paragraph];
+}
+
+table Articles {
+    articles: [Article];
+}
+
+root_type Articles;
