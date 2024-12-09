@@ -66,6 +66,9 @@
         "thread": "cpp",
         "codecvt": "cpp",
         "forward_list": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "bitset": "cpp",
+        "regex": "cpp",
+        "cinttypes": "cpp"
     }
 }

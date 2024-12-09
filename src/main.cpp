@@ -66,6 +66,12 @@ void testLoadJson()
     myRapidjson.setFlowers(flowers);
     myRapidjson.Serialize();
     myRapidjson.DeSerialize();
+
+    std::cout<<"*************test results*************"<<std::endl;
+    std::cout<<"benmark name : iris 9 k"<<std::endl;
+    std::cout<<"flatbuffer"<< "序列化时间："<<myFlatBuffer.m_serializeTime << "反序列化时间："<<myFlatBuffer.m_deserializeTime<<std::endl;
+    std::cout<<"protobuffer"<< "序列化时间："<<myProtoBuf.m_serializeTime<< "反序列化时间：" << myProtoBuf.m_deserializeTime<<std::endl;
+    std::cout<<"rapidjson"<< "序列化时间："<<myRapidjson.m_serializeTime<< "反序列化时间：" << myRapidjson.m_deserializeTime<<std::endl;
 }
 
 template <typename Func>
@@ -82,34 +88,34 @@ double measureTime(Func&& func) {
 void testSerialization() {
 
     testLoadJson();
-    std::string name = "Example";
-    int id = 1234;
-    std::vector<int> values = {1, 2, 3, 4, 5};
+    // std::string name = "Example";
+    // int id = 1234;
+    // std::vector<int> values = {1, 2, 3, 4, 5};
 
     // 测试 FlatBuffers
-    {
-        flatbuffers::FlatBufferBuilder builder;
-        auto nameOffset = builder.CreateString(name);
-        auto valuesOffset = builder.CreateVector(values);
-        auto flatBufferData = CreateTYL(builder, id, nameOffset, valuesOffset);
-        // builder.Finish(flatBufferData);
+    // {
+    //     flatbuffers::FlatBufferBuilder builder;
+    //     auto nameOffset = builder.CreateString(name);
+    //     auto valuesOffset = builder.CreateVector(values);
+    //     auto flatBufferData = CreateTYL(builder, id, nameOffset, valuesOffset);
+    //     // builder.Finish(flatBufferData);
 
 
-        double serializeTime = measureTime([&]() {
-            // builder.Clear();
-            builder.Finish(flatBufferData);
-        });
-        std::vector<uint8_t> serializedData(builder.GetBufferPointer(), 
-                                    builder.GetBufferPointer() + builder.GetSize());
-        std::cout << "FlatBuffers Serialization Time: " << serializeTime << " ms\n";
-        std::cout << "FlatBuffers Serialized Size: " << serializedData.size() << " bytes\n";
+    //     double serializeTime = measureTime([&]() {
+    //         // builder.Clear();
+    //         builder.Finish(flatBufferData);
+    //     });
+    //     std::vector<uint8_t> serializedData(builder.GetBufferPointer(), 
+    //                                 builder.GetBufferPointer() + builder.GetSize());
+    //     std::cout << "FlatBuffers Serialization Time: " << serializeTime << " ms\n";
+    //     std::cout << "FlatBuffers Serialized Size: " << serializedData.size() << " bytes\n";
 
-        double deserializeTime = measureTime([&]() {
-            auto deserializedObject = GetTYL(serializedData.data());
-            (void)deserializedObject;
-        });
-        std::cout << "FlatBuffers Deserialization Time: " << deserializeTime << " ms\n";
-    }
+    //     double deserializeTime = measureTime([&]() {
+    //         auto deserializedObject = GetTYL(serializedData.data());
+    //         (void)deserializedObject;
+    //     });
+    //     std::cout << "FlatBuffers Deserialization Time: " << deserializeTime << " ms\n";
+    // }
 }
 int main()
 {

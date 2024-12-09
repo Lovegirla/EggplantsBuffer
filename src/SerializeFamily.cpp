@@ -9,6 +9,15 @@
 #include "iris_generated.h"
 #include "include/iris.proto3.pb.h"
 
+template <typename Func>
+double measureTime(Func&& func) {
+    auto start = std::chrono::high_resolution_clock::now();
+    func();
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> elapsed = end - start;
+    return elapsed.count();
+}
+
 
 void SerializeFlatBuffer::Serialize()
 {
@@ -25,7 +34,9 @@ void SerializeFlatBuffer::Serialize()
     auto flowersVector = builder.CreateVector(flowerOffsets);
     auto root = test::CreateFlowers(builder, flowersVector);
 
-    builder.Finish(root);
+    m_serializeTime  = measureTime([&]() {
+            builder.Finish(root);
+    });
 
     std::ofstream outFile("flatbuffer_data.bin", std::ios::binary);
     outFile.write(reinterpret_cast<const char*>(builder.GetBufferPointer()), builder.GetSize());
@@ -36,16 +47,21 @@ void SerializeFlatBuffer::DeSerialize()
 {
     std::ifstream inFile("flatbuffer_data.bin", std::ios::binary);
     std::vector<char> buffer((std::istreambuf_iterator<char>(inFile)), std::istreambuf_iterator<char>());
-    const test::Flowers* flowers = test::GetFlowers(buffer.data());
+    
+    const test::Flowers* flowers = nullptr;
+    m_deserializeTime  = measureTime([&]() {
+        flowers = test::GetFlowers(buffer.data());
+    });
+
     //test getbuffer() wjz
 
-    // for (const auto& flower : *flowers->flowers()) {
-    //     std::cout << "Species: " << flower->species()->c_str()
-    //               << ", Sepal Length: " << flower->sepalLength()
-    //               << ", Sepal Width: " << flower->sepalWidth()
-    //               << ", Petal Length: " << flower->petalLength()
-    //               << ", Petal Width: " << flower->petalWidth() << std::endl;
-    // }
+    for (const auto& flower : *flowers->flowers()) {
+        std::cout << "Species: " << flower->species()->c_str()
+                  << ", Sepal Length: " << flower->sepalLength()
+                  << ", Sepal Width: " << flower->sepalWidth()
+                  << ", Petal Length: " << flower->petalLength()
+                  << ", Petal Width: " << flower->petalWidth() << std::endl;
+    }
 }
 
 SerializeFamily::SerializeFamily()
@@ -91,7 +107,10 @@ void SerializeProtobuf::Serialize()
     }
 
     std::ofstream outFile("protobuf_data.bin", std::ios::binary);
-    protobufFlowers.SerializeToOstream(&outFile);
+    m_serializeTime  = measureTime([&]() {
+            protobufFlowers.SerializeToOstream(&outFile);
+    });
+
     outFile.close();
 }
 
@@ -99,7 +118,9 @@ void SerializeProtobuf::DeSerialize()
 {
     test1::Flowers protobufFlowers;
     std::ifstream inFile("protobuf_data.bin", std::ios::binary);
-    protobufFlowers.ParseFromIstream(&inFile);
+    m_deserializeTime  = measureTime([&]() {
+        protobufFlowers.ParseFromIstream(&inFile);
+    });
 
     //test getbuffer() wjz
     // for (const auto& flower : protobufFlowers.flowers()) {
@@ -109,6 +130,7 @@ void SerializeProtobuf::DeSerialize()
     //               << ", Petal Length: " << flower.petallength()
     //               << ", Petal Width: " << flower.petalwidth() << std::endl;
     // }
+    inFile.close();
 }
 
 void SerializeRapidjson::Serialize()
@@ -116,24 +138,27 @@ void SerializeRapidjson::Serialize()
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
 
-    writer.StartArray(); 
 
-    for (const auto& flower : m_flowers) {
-        writer.StartObject();
-        writer.Key("sepalLength");
-        writer.Double(flower.sepalLength);
-        writer.Key("sepalWidth");
-        writer.Double(flower.sepalWidth);
-        writer.Key("petalLength");
-        writer.Double(flower.petalLength);
-        writer.Key("petalWidth");
-        writer.Double(flower.petalWidth);
-        writer.Key("species");
-        writer.String(flower.species.c_str());
-        writer.EndObject();
-    }
 
-    writer.EndArray(); 
+
+     m_serializeTime  = measureTime([&]() {
+        writer.StartArray(); 
+        for (const auto& flower : m_flowers) {
+            writer.StartObject();
+            writer.Key("sepalLength");
+            writer.Double(flower.sepalLength);
+            writer.Key("sepalWidth");
+            writer.Double(flower.sepalWidth);
+            writer.Key("petalLength");
+            writer.Double(flower.petalLength);
+            writer.Key("petalWidth");
+            writer.Double(flower.petalWidth);
+            writer.Key("species");
+            writer.String(flower.species.c_str());
+            writer.EndObject();
+        }
+        writer.EndArray(); 
+    });
 
     std::ofstream outFile("rapidjson_data.json");
     outFile << buffer.GetString();
@@ -152,7 +177,9 @@ void SerializeRapidjson::DeSerialize()
     
     
     rapidjson::Document document;
-    document.Parse(jsonStr.c_str());
+    m_deserializeTime  = measureTime([&]() {
+        document.Parse(jsonStr.c_str());
+    });
 
     if (document.HasParseError()) {
         std::cerr << "JSON parsing error!" << std::endl;

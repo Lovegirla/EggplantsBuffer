@@ -12,6 +12,9 @@ public:
     virtual void DeSerialize() = 0;
     void PrintFlowers();
     void setFlowers(std::vector<FlowerData> inFlowers);
+public:
+    double m_serializeTime;
+    double m_deserializeTime;
 protected:
     std::vector<FlowerData> m_flowers;
 };
