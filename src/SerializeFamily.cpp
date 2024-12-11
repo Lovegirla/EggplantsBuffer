@@ -23,9 +23,8 @@ double measureTime(Func&& func) {
 
 void SerializeFlatBuffer::SerializeFlower()
 {
-    flatbuffers::FlatBufferBuilder builder;
     m_serializeTimeFlower  = measureTime([&]() {
-
+        flatbuffers::FlatBufferBuilder builder;
 
         std::vector<flatbuffers::Offset<test::Flower>> flowerOffsets;
         for (const auto& data : m_flowers) {
@@ -39,17 +38,19 @@ void SerializeFlatBuffer::SerializeFlower()
         auto root = test::CreateFlowers(builder, flowersVector);
 
         builder.Finish(root);
+
+        std::ofstream outFile("flatbuffer_data.bin", std::ios::binary);
+        outFile.write(reinterpret_cast<const char*>(builder.GetBufferPointer()), builder.GetSize());
+        outFile.close();
     });
-    std::ofstream outFile("flatbuffer_data.bin", std::ios::binary);
-    outFile.write(reinterpret_cast<const char*>(builder.GetBufferPointer()), builder.GetSize());
-    outFile.close();
 }
 
 void SerializeFlatBuffer::DeSerializeFlower()
 {
-    std::ifstream inFile("flatbuffer_data.bin", std::ios::binary);
-    std::vector<char> buffer((std::istreambuf_iterator<char>(inFile)), std::istreambuf_iterator<char>());
     m_deserializeTimeFlower  = measureTime([&]() {
+        std::ifstream inFile("flatbuffer_data.bin", std::ios::binary);
+        std::vector<char> buffer((std::istreambuf_iterator<char>(inFile)), std::istreambuf_iterator<char>());
+
 
         const test::Flowers* flowers = nullptr;
         flowers = test::GetFlowers(buffer.data());
@@ -68,9 +69,10 @@ void SerializeFlatBuffer::DeSerializeFlower()
 
 void SerializeFlatBuffer::SerializeArticles()
 {
-    flatbuffers::FlatBufferBuilder builder;
-    std::vector<flatbuffers::Offset<ArticleData::Article>> serializedArticles;
     m_serializeTimeArticle  = measureTime([&]() {
+        flatbuffers::FlatBufferBuilder builder;
+        std::vector<flatbuffers::Offset<ArticleData::Article>> serializedArticles;
+
         for (const auto& article : m_articles) {
             auto title = builder.CreateString(article.m_title);
 
@@ -103,22 +105,25 @@ void SerializeFlatBuffer::SerializeArticles()
 
         auto root = builder.CreateVector(serializedArticles);
         builder.Finish(root);
+
+        std::ofstream outFile("flatbuffer_data_articale.bin", std::ios::binary);
+        outFile.write(reinterpret_cast<const char*>(builder.GetBufferPointer()), builder.GetSize());
+        outFile.close();
     });
-    std::ofstream outFile("flatbuffer_data_articale.bin", std::ios::binary);
-    outFile.write(reinterpret_cast<const char*>(builder.GetBufferPointer()), builder.GetSize());
-    outFile.close();
 }
 
 void SerializeFlatBuffer::DeSerializeArticles()
 {
-    std::ifstream inFile("flatbuffer_data_articale.bin", std::ios::binary);
-    std::vector<char> buffer((std::istreambuf_iterator<char>(inFile)), std::istreambuf_iterator<char>());
-    
-    const ArticleData::Articles* artical = nullptr;
     m_deserializeTimeArticle  = measureTime([&]() {
+        std::ifstream inFile("flatbuffer_data_articale.bin", std::ios::binary);
+        std::vector<char> buffer((std::istreambuf_iterator<char>(inFile)), std::istreambuf_iterator<char>());
+        
+        const ArticleData::Articles* artical = nullptr;
+
         artical = ArticleData::GetArticles(buffer.data());
+        
+        inFile.close();
     });
-    inFile.close();
 }
 
 SerializeFamily::SerializeFamily()
@@ -162,9 +167,10 @@ void SerializeFamily::setArticles(std::vector<Articles> inArticles)
 
 void SerializeProtobuf::SerializeFlower()
 {
-    test1::Flowers protobufFlowers;
-    std::ofstream outFile("protobuf_data.bin", std::ios::binary);
     m_serializeTimeFlower  = measureTime([&]() {
+        test1::Flowers protobufFlowers;
+        std::ofstream outFile("protobuf_data.bin", std::ios::binary);
+
         for (const auto& data : m_flowers) {
                 test1::Flower* flower = protobufFlowers.add_flowers();
                 flower->set_sepallength(data.sepalLength);
@@ -179,18 +185,20 @@ void SerializeProtobuf::SerializeFlower()
 
 
         protobufFlowers.SerializeToOstream(&outFile);
-    });
 
-    outFile.close();
+
+        outFile.close();
+    });
 }
 
 void SerializeProtobuf::DeSerializeFlower()
 {
-    test1::Flowers protobufFlowers;
-    std::ifstream inFile("protobuf_data.bin", std::ios::binary);
     m_deserializeTimeFlower  = measureTime([&]() {
+        test1::Flowers protobufFlowers;
+        std::ifstream inFile("protobuf_data.bin", std::ios::binary);
+
         protobufFlowers.ParseFromIstream(&inFile);
-    });
+
 
     //test getbuffer() wjz
     // for (const auto& flower : protobufFlowers.flowers()) {
@@ -200,14 +208,16 @@ void SerializeProtobuf::DeSerializeFlower()
     //               << ", Petal Length: " << flower.petallength()
     //               << ", Petal Width: " << flower.petalwidth() << std::endl;
     // }
-    inFile.close();
+        inFile.close();
+    });
 }
 
 void SerializeProtobuf::SerializeArticles()
 {
-    test_art::Articles protoArticles;
-    std::ofstream outFile("flatbuffer_data_articale.bin", std::ios::binary);
     m_serializeTimeArticle  = measureTime([&]() {
+        test_art::Articles protoArticles;
+        std::ofstream outFile("flatbuffer_data_articale.bin", std::ios::binary);
+
         for (const auto& article : m_articles) {
             test_art::Article* protoarticle = protoArticles.add_article();
             protoarticle->set_title(article.m_title);
@@ -231,27 +241,30 @@ void SerializeProtobuf::SerializeArticles()
             }
         }
         protoArticles.SerializeToOstream(&outFile);
-    });
 
-    outFile.close();
+
+        outFile.close();
+    });
 }
 
 void SerializeProtobuf::DeSerializeArticles()
 {
-    test_art::Article protoArticle;
-    std::ifstream inFile("flatbuffer_data_articale.bin", std::ios::binary);
     m_deserializeTimeArticle  = measureTime([&]() {
-        protoArticle.ParseFromIstream(&inFile);
+        test_art::Article protoArticle;
+        std::ifstream inFile("flatbuffer_data_articale.bin", std::ios::binary);
+
+            protoArticle.ParseFromIstream(&inFile);
+
+        inFile.close();
     });
-    inFile.close();
 }
 
 void SerializeRapidjson::SerializeFlower()
 {
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    m_serializeTimeFlower  = measureTime([&]() {
+        rapidjson::StringBuffer buffer;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
 
-     m_serializeTimeFlower  = measureTime([&]() {
         writer.StartArray(); 
         for (const auto& flower : m_flowers) {
             writer.StartObject();
@@ -268,57 +281,51 @@ void SerializeRapidjson::SerializeFlower()
             writer.EndObject();
         }
         writer.EndArray(); 
-    });
 
-    std::ofstream outFile("rapidjson_data.json");
-    outFile << buffer.GetString();
-    outFile.close();
+
+        std::ofstream outFile("rapidjson_data.json");
+        outFile << buffer.GetString();
+        outFile.close();
+    });
 }
 
 void SerializeRapidjson::DeSerializeFlower()
 {
-    std::ifstream inFile("rapidjson_data.json");
-    if (!inFile) {
-        std::cerr << "Error opening rapidjson_data file " << std::endl;
-        return;
-    }
-
-    std::string jsonStr((std::istreambuf_iterator<char>(inFile)), std::istreambuf_iterator<char>());
-    
-    
-    rapidjson::Document document;
     m_deserializeTimeFlower  = measureTime([&]() {
+        std::ifstream inFile("rapidjson_data.json");
+
+        std::string jsonStr((std::istreambuf_iterator<char>(inFile)), std::istreambuf_iterator<char>());
+        
+        
+        rapidjson::Document document;
+
         document.Parse(jsonStr.c_str());
+
+    // for (const auto& item : document.GetArray()) {
+    //     FlowerData data;
+    //     data.sepalLength = item["sepalLength"].GetFloat();
+    //     data.sepalWidth = item["sepalWidth"].GetFloat();
+    //     data.petalLength = item["petalLength"].GetFloat();
+    //     data.petalWidth = item["petalWidth"].GetFloat();
+    //     data.species = item["species"].GetString();
+    //     //test getbuffer() wjz
+    //     // std::cout << "Species: " << data.species
+    //     //     << ", Sepal Length: " << data.sepalWidth
+    //     //     << ", Sepal Width: " << data.sepalLength
+    //     //     << ", Petal Length: " << data.petalLength
+    //     //     << ", Petal Width: " << data.petalWidth << std::endl;
+    // }
+        inFile.close();
     });
 
-    if (document.HasParseError()) {
-        std::cerr << "JSON parsing error!" << std::endl;
-        return;
-    }
-
-
-    for (const auto& item : document.GetArray()) {
-        FlowerData data;
-        data.sepalLength = item["sepalLength"].GetFloat();
-        data.sepalWidth = item["sepalWidth"].GetFloat();
-        data.petalLength = item["petalLength"].GetFloat();
-        data.petalWidth = item["petalWidth"].GetFloat();
-        data.species = item["species"].GetString();
-        //test getbuffer() wjz
-        // std::cout << "Species: " << data.species
-        //     << ", Sepal Length: " << data.sepalWidth
-        //     << ", Sepal Width: " << data.sepalLength
-        //     << ", Petal Length: " << data.petalLength
-        //     << ", Petal Width: " << data.petalWidth << std::endl;
-    }
-    inFile.close();
 }
 
 void SerializeRapidjson::SerializeArticles()
 {
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
     m_serializeTimeArticle  = measureTime([&]() {
+        rapidjson::StringBuffer buffer;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+
         writer.StartArray(); 
         for (const auto& article : m_articles) {
             writer.StartObject();
@@ -362,32 +369,25 @@ void SerializeRapidjson::SerializeArticles()
             writer.EndObject();
         }
         writer.EndArray(); 
+
+        std::ofstream outFile("rapidjson_data.json");
+        outFile << buffer.GetString();
+        outFile.close();
     });
-    std::ofstream outFile("rapidjson_data.json");
-    outFile << buffer.GetString();
-    outFile.close();
 }
 
 void SerializeRapidjson::DeSerializeArticles()
 {
-    std::ifstream inFile("rapidjson_data.json");
-    if (!inFile) {
-        std::cerr << "Error opening rapidjson_data file " << std::endl;
-        return;
-    }
-
-    std::string jsonStr((std::istreambuf_iterator<char>(inFile)), std::istreambuf_iterator<char>());
-    
-    
-    rapidjson::Document document;
     m_deserializeTimeArticle  = measureTime([&]() {
-        document.Parse(jsonStr.c_str());
-    });
+        std::ifstream inFile("rapidjson_data.json");
 
-    if (document.HasParseError()) {
-        std::cerr << "JSON parsing error!" << std::endl;
-        return;
-    }
+
+        std::string jsonStr((std::istreambuf_iterator<char>(inFile)), std::istreambuf_iterator<char>());
+        
+        
+        rapidjson::Document document;
+
+        document.Parse(jsonStr.c_str());
 
 
     for (const auto& articleJson : document.GetArray()) {
@@ -418,4 +418,5 @@ void SerializeRapidjson::DeSerializeArticles()
         m_articles.push_back(article);
     }
     inFile.close();
+    });
 }

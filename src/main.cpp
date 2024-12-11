@@ -17,40 +17,31 @@
 
 void testSerialization() {
 
-    // std::string name = "Example";
-    // int id = 1234;
-    // std::vector<int> values = {1, 2, 3, 4, 5};
+    std::string name = "Example";
+    int id = 1234;
+    std::vector<int> values = {1, 2, 3, 4, 5};
 
-    // 测试 FlatBuffers
-    // {
-    //     flatbuffers::FlatBufferBuilder builder;
-    //     auto nameOffset = builder.CreateString(name);
-    //     auto valuesOffset = builder.CreateVector(values);
-    //     auto flatBufferData = CreateTYL(builder, id, nameOffset, valuesOffset);
-    //     // builder.Finish(flatBufferData);
+    //测试 FlatBuffers
+    {
+        flatbuffers::FlatBufferBuilder builder;
+        auto nameOffset = builder.CreateString(name);
+        auto valuesOffset = builder.CreateVector(values);
+        auto flatBufferData = CreateTYL(builder, id, nameOffset, valuesOffset);
+        // builder.Finish(flatBufferData);
+        builder.Finish(flatBufferData);
 
+        std::vector<uint8_t> serializedData(builder.GetBufferPointer(), 
+                                    builder.GetBufferPointer() + builder.GetSize());
+        std::cout << "FlatBuffers Serialized Size: " << serializedData.size() << " bytes\n";
 
-    //     double serializeTime = measureTime([&]() {
-    //         // builder.Clear();
-    //         builder.Finish(flatBufferData);
-    //     });
-    //     std::vector<uint8_t> serializedData(builder.GetBufferPointer(), 
-    //                                 builder.GetBufferPointer() + builder.GetSize());
-    //     std::cout << "FlatBuffers Serialization Time: " << serializeTime << " ms\n";
-    //     std::cout << "FlatBuffers Serialized Size: " << serializedData.size() << " bytes\n";
-
-    //     double deserializeTime = measureTime([&]() {
-    //         auto deserializedObject = GetTYL(serializedData.data());
-    //         (void)deserializedObject;
-    //     });
-    //     std::cout << "FlatBuffers Deserialization Time: " << deserializeTime << " ms\n";
-    // }
+        auto deserializedObject = GetTYL(serializedData.data());
+    }
 }
 int main()
 {
+    testSerialization();
     MyTest mytest;
     mytest.TestFlower();
     mytest.TestArticles();
-    testSerialization();
     return 0;
 }

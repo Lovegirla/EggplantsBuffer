@@ -82,7 +82,7 @@ void MyTest::TestFlower()
     SerializeFlatBuffer myFlatBuffer;
     SerializeProtobuf myProtoBuf;
     SerializeRapidjson myRapidjson;
-    loadIrisData("/home/notebook/EggplantsBuffer/benchmark/iris.json", flowers);
+    loadIrisData("/home/notebook/EggplantsBuffer/benchmark/iris_extend.json", flowers);
 
 
     std::cout <<"*************EggplantsBuffer*************"<<std::endl; 
@@ -109,7 +109,7 @@ void MyTest::TestFlower()
     myRapidjson.DeSerializeFlower();
 
     std::cout<<"*************test results*************"<<std::endl;
-    std::cout<<"benmark name : iris 16 k"<<std::endl;
+    std::cout<<"benmark name : iris 4.88 k"<<std::endl;
     std::cout<<"flatbuffer"<< "序列化时间(ms):"<<myFlatBuffer.m_serializeTimeFlower << "反序列化时间(ms):"<<myFlatBuffer.m_deserializeTimeFlower<<std::endl;
     std::cout<<"protobuffer"<< "序列化时间(ms):"<<myProtoBuf.m_serializeTimeFlower<< "反序列化时间(ms):" << myProtoBuf.m_deserializeTimeFlower<<std::endl;
     std::cout<<"rapidjson"<< "序列化时间(ms):"<<myRapidjson.m_serializeTimeFlower<< "反序列化时间(ms):" << myRapidjson.m_deserializeTimeFlower<<std::endl;
